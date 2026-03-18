@@ -1,8 +1,20 @@
+<div align="center">
+
 # GitPulse
 
 **Interactive GitHub Activity Visualizer**
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![D3.js](https://img.shields.io/badge/D3.js-v7-F9A03C?logo=d3.js&logoColor=white)](https://d3js.org/)
+
 Visualize any GitHub profile with stunning interactive charts — constellation graphs, animated contribution heatmaps, language timelines, and a personalized GitHub Wrapped.
+
+<!-- Replace with an actual screenshot of the app -->
+<!-- ![GitPulse Demo](docs/demo.png) -->
+
+</div>
 
 ## Features
 
