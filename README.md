@@ -11,8 +11,9 @@
 
 Visualize any GitHub profile with stunning interactive charts — constellation graphs, animated contribution heatmaps, language timelines, and a personalized GitHub Wrapped.
 
-<!-- Replace with an actual screenshot of the app -->
-<!-- ![GitPulse Demo](docs/demo.png) -->
+![Home](docs/home.png)
+
+
 
 </div>
 
@@ -27,6 +28,14 @@ Visualize any GitHub profile with stunning interactive charts — constellation 
 - **Embeddable Widget** — Embed your GitHub stats anywhere with `<iframe src="gitpulse.dev/widget/username" />`.
 - **Zero Login** — Works with public GitHub data, no authentication required.
 - **OG Images** — Dynamic Open Graph images generated for every profile.
+
+## Screenshots
+
+### Profile
+![Profile](docs/profile.png)
+
+### GitHub Wrapped
+![Wrapped](docs/wrapped.png)
 
 ## Tech Stack
 
