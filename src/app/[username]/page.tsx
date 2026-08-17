@@ -14,16 +14,16 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { username } = await params;
   return {
-    title: `${username} — GitPulse`,
+    title: `${username} | GitPulse`,
     description: `Interactive visualization of ${username}'s GitHub activity. Contributions, languages, repositories, and more.`,
     openGraph: {
-      title: `${username} — GitPulse`,
+      title: `${username} | GitPulse`,
       description: `Interactive visualization of ${username}'s GitHub activity.`,
       images: [`/api/og?username=${username}`],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${username} — GitPulse`,
+      title: `${username} | GitPulse`,
       images: [`/api/og?username=${username}`],
     },
   };

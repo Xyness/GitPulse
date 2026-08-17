@@ -11,10 +11,10 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { username } = await params;
   return {
-    title: `${username}'s GitHub Wrapped — GitPulse`,
-    description: `${username}'s year in code — top languages, contributions, streaks, and more.`,
+    title: `${username}'s GitHub Wrapped | GitPulse`,
+    description: `${username}'s year in code: top languages, contributions, streaks, and more.`,
     openGraph: {
-      title: `${username}'s GitHub Wrapped — GitPulse`,
+      title: `${username}'s GitHub Wrapped | GitPulse`,
       description: `${username}'s year in code.`,
       images: [`/api/og?username=${username}&wrapped=true`],
     },

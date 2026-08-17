@@ -10,7 +10,7 @@ const features = [
     icon: <Star className="h-6 w-6" />,
     title: "Constellation Graph",
     description:
-      "Your repos as an interactive star map — size by stars, color by language.",
+      "Your repos as an interactive star map. Size by stars, color by language.",
   },
   {
     icon: <BarChart3 className="h-6 w-6" />,
@@ -28,7 +28,7 @@ const features = [
     icon: <Sparkles className="h-6 w-6" />,
     title: "GitHub Wrapped",
     description:
-      "Your year in code — top language, longest streak, most active repo.",
+      "Your year in code: top language, longest streak, most active repo.",
   },
 ];
 
@@ -68,7 +68,7 @@ export default function HomePage() {
           </div>
 
           <p className="text-xs text-muted-foreground">
-            No login required — works with public GitHub data
+            No login required, works with public GitHub data
           </p>
         </motion.div>
       </section>

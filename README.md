@@ -37,7 +37,7 @@ meant to be dropped into an iframe:
 <iframe src="https://git-pulse-virid.vercel.app/widget/torvalds" />
 ```
 
-No login anywhere — it only ever reads public data.
+No login anywhere, it only ever reads public data.
 
 ![Profile](docs/profile.png)
 
@@ -61,7 +61,7 @@ requests an hour) after a handful of profiles. Drop a token in `.env.local` and 
 GITHUB_TOKEN=ghp_your_token_here
 ```
 
-The token needs no scopes — public data only.
+The token needs no scopes, public data only.
 
 ## Routes
 

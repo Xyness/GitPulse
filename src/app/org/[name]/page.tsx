@@ -12,7 +12,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { name } = await params;
   return {
-    title: `${name} — GitPulse`,
+    title: `${name} | GitPulse`,
     description: `Interactive visualization of the ${name} organization on GitHub.`,
   };
 }
