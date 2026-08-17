@@ -1,64 +1,49 @@
-# Contributing to GitPulse
+# Contributing
 
-Thanks for your interest in contributing! Here's how to get started.
+Happy to take patches. Nothing here is heavy process.
 
-## Development Setup
+## Setup
 
-1. Fork and clone the repository
-2. Install dependencies: `npm install`
-3. Copy `.env.example` to `.env.local` and optionally add a GitHub token
-4. Start the dev server: `npm run dev`
+Fork, clone, then:
 
-## Code Style
-
-- **TypeScript strict mode** — no `any` types
-- **Functional React components** with hooks
-- **One visualization = one file** — keep visualization components isolated and reusable
-- **Tailwind CSS** for styling, with `cn()` utility for conditional classes
-
-## Commit Convention
-
-We use [Conventional Commits](https://www.conventionalcommits.org/):
-
-- `feat:` — New feature
-- `fix:` — Bug fix
-- `refactor:` — Code restructuring without behavior change
-- `docs:` — Documentation only
-- `style:` — Formatting, missing semicolons, etc.
-- `test:` — Adding or updating tests
-- `chore:` — Maintenance tasks
-
-Examples:
-```
-feat: add language pie chart visualization
-fix: handle empty repo list in constellation graph
-docs: update README with widget embed instructions
+```bash
+npm install
+cp .env.example .env.local   # add a GITHUB_TOKEN if you don't want to fight the rate limit
+npm run dev
 ```
 
-## Pull Request Process
+## Before you open a PR
 
-1. Create a feature branch from `main`
-2. Make your changes with clear, atomic commits
-3. Ensure `npm run build` passes without errors
-4. Open a PR with a clear description of what changed and why
+Branch off `main`, keep the commits reasonably atomic, and make sure `npm run build` is
+clean — the build runs the type checker, and strict mode is on, so a passing build catches
+most of what a review would flag anyway.
 
-## Adding a New Visualization
+Then describe what changed and why. The why is the part that's actually useful.
 
-1. Create a new component in `src/components/visualizations/`
-2. Use the `useD3` and `useResizeObserver` hooks for D3.js integration
-3. Wrap in a `<Card>` with a title and description
-4. Add accessibility: `role="img"` and `aria-label` on the viz container
-5. Export and use in the profile view
+## Style
 
-## Reporting Issues
+TypeScript is in strict mode and `any` isn't welcome. Components are functions with hooks.
+Styling is Tailwind, with `cn()` when classes are conditional.
 
-Please use GitHub Issues with one of these labels:
+Keep one visualization per file under `src/components/visualizations/`. They tend to grow,
+and mixing two of them in a file makes both harder to touch.
 
-- `bug` — Something isn't working
-- `enhancement` — Feature request
-- `good first issue` — Good for newcomers
-- `help wanted` — Extra attention needed
+Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) —
+`feat:`, `fix:`, `refactor:`, `docs:`, `chore:` are the ones that come up:
 
-## Code of Conduct
+```
+feat: add language pie chart
+fix: handle empty repo list in the constellation
+```
 
-Be respectful and constructive. We're all here to build something cool.
+## Adding a visualization
+
+Drop the component in `src/components/visualizations/`, use `useD3` and `useResizeObserver`
+so it redraws on resize, wrap it in a `<Card>` with a title, and put `role="img"` plus an
+`aria-label` on the container — an SVG full of circles is nothing to a screen reader
+otherwise. Then wire it into the profile view.
+
+## Issues
+
+GitHub Issues, with `bug` or `enhancement` on it. Screenshots help a lot for anything
+visual.

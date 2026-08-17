@@ -2,144 +2,99 @@
 
 # GitPulse
 
-**Interactive GitHub Activity Visualizer**
+**Interactive GitHub activity visualizer**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![D3.js](https://img.shields.io/badge/D3.js-v7-F9A03C?logo=d3.js&logoColor=white)](https://d3js.org/)
 
-Visualize any GitHub profile with stunning interactive charts — constellation graphs, animated contribution heatmaps, language timelines, and a personalized GitHub Wrapped.
+Type in a GitHub username and get their public activity back as something worth looking at.
+
+[**Live demo**](https://git-pulse-virid.vercel.app)
 
 ![Home](docs/home.png)
 
-
-
 </div>
 
-## Features
+## What's in it
 
-- **Constellation Graph** — Your repositories as an interactive star map. Size = stars, color = language. Drag, zoom, and explore.
-- **Contribution Heatmap** — Animated heatmap with drill-down per day. Click any cell to see details.
-- **Language Timeline** — Streamgraph showing how your tech stack evolved over time.
-- **Activity Timeline** — Chronological view of repository creation history.
-- **GitHub Wrapped** — Your year in code: top language, longest streak, most active repo, and more. Shareable via URL.
-- **Compare Mode** — Side-by-side comparison of two GitHub profiles.
-- **Embeddable Widget** — Embed your GitHub stats anywhere with `<iframe src="gitpulse.dev/widget/username" />`.
-- **Zero Login** — Works with public GitHub data, no authentication required.
-- **OG Images** — Dynamic Open Graph images generated for every profile.
+The centrepiece is the **constellation**: every repo is a star, sized by stargazers and
+coloured by language, laid out by a force simulation that pulls repos sharing a language
+towards each other. You can drag stars around and zoom in.
 
-## Screenshots
+Alongside that there's a **contribution heatmap** you can click into day by day, a
+**streamgraph** of how someone's languages shifted year over year, and a plain chronological
+timeline of when repos appeared.
 
-### Profile
+**Wrapped** is the Spotify-Wrapped-style thing: seven animated slides covering the year's
+totals, top language, longest streak, busiest repo. It has its own URL so it's shareable.
+
+**Compare** puts two profiles side by side, and `/widget/[username]` is a stripped-down page
+meant to be dropped into an iframe:
+
+```html
+<iframe src="https://git-pulse-virid.vercel.app/widget/torvalds" />
+```
+
+No login anywhere — it only ever reads public data.
+
 ![Profile](docs/profile.png)
 
-### GitHub Wrapped
 ![Wrapped](docs/wrapped.png)
 
-## Tech Stack
-
-| Component       | Technology                        |
-| --------------- | --------------------------------- |
-| Framework       | Next.js 14 (App Router)           |
-| Styling         | Tailwind CSS + shadcn/ui          |
-| Visualizations  | D3.js v7 + Framer Motion          |
-| Data Fetching   | GitHub GraphQL API (Octokit)      |
-| Cache           | In-memory (server-side, 10 min TTL) |
-| OG Images       | @vercel/og                        |
-| Deployment      | Vercel                            |
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- npm
-
-### Installation
+## Running it locally
 
 ```bash
 git clone https://github.com/Xyness/GitPulse.git
 cd GitPulse
 npm install
-```
-
-### Configuration
-
-Copy the environment file:
-
-```bash
 cp .env.example .env.local
+npm run dev
 ```
 
-Optionally add a GitHub token for higher rate limits (60 req/h without, 5000 req/h with):
+It works with no configuration, but you'll hit GitHub's unauthenticated rate limit (60
+requests an hour) after a handful of profiles. Drop a token in `.env.local` and that becomes
+5000:
 
 ```env
 GITHUB_TOKEN=ghp_your_token_here
 ```
 
-### Development
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
-
-### Build
-
-```bash
-npm run build
-npm start
-```
+The token needs no scopes — public data only.
 
 ## Routes
 
-| Route                     | Description                          |
-| ------------------------- | ------------------------------------ |
-| `/`                       | Home page with search                |
-| `/[username]`             | User profile with all visualizations |
-| `/org/[name]`             | Organization profile                 |
-| `/wrapped/[username]`     | GitHub Wrapped animated slides       |
-| `/compare`                | Side-by-side profile comparison      |
-| `/widget/[username]`      | Embeddable widget (for iframes)      |
-| `/api/og?username=X`      | Dynamic OG image generation          |
-| `/api/profile/[username]` | JSON API for profile data            |
+| Route | |
+| --- | --- |
+| `/` | Search |
+| `/[username]` | Full profile, every visualization |
+| `/org/[name]` | Organization view |
+| `/wrapped/[username]` | Animated Wrapped slides |
+| `/compare` | Two profiles side by side |
+| `/widget/[username]` | Embeddable, no chrome |
+| `/api/profile/[username]` | The JSON behind the pages |
+| `/api/og?username=X` | Generated OG image |
 
-## Project Structure
+## Notes on the build
 
-```
-src/
-├── app/                          # Next.js App Router pages
-│   ├── [username]/               # Dynamic profile page
-│   ├── org/[name]/               # Organization page
-│   ├── wrapped/[username]/       # Wrapped animated slides
-│   ├── compare/                  # Profile comparison
-│   ├── widget/[username]/        # Embeddable widget
-│   └── api/                      # API routes (OG images, profile data)
-├── components/
-│   ├── visualizations/           # D3.js + Framer Motion viz components
-│   │   ├── ConstellationGraph    # Force-directed repo graph
-│   │   ├── ContributionHeatmap   # Animated contribution heatmap
-│   │   ├── LanguageTimeline      # Streamgraph of languages over time
-│   │   ├── LanguageBreakdown     # Language distribution bar
-│   │   ├── ActivityTimeline      # Repo creation timeline
-│   │   └── WrappedSlides         # Animated wrapped presentation
-│   └── ui/                       # Reusable UI components
-├── lib/
-│   ├── github.ts                 # GitHub GraphQL API client
-│   ├── transforms.ts             # Data transformation for visualizations
-│   ├── cache.ts                  # Server-side caching
-│   ├── types.ts                  # TypeScript types
-│   └── cn.ts                     # Utility for class names
-└── hooks/                        # Custom React hooks
-    ├── useD3.ts                  # D3.js integration hook
-    └── useResizeObserver.ts      # Responsive container hook
-```
+Data comes from GitHub's GraphQL API via `@octokit/graphql`, one query per profile instead of
+a fan-out of REST calls. Contribution calendars are only exposed over GraphQL anyway.
+
+Responses are cached in a `Map` in module scope for ten minutes. That's per serverless
+instance and evaporates on cold start, which is the right trade for this: it costs nothing,
+and the failure mode is just a slower page.
+
+Every D3 component tears its SVG down and redraws on resize rather than doing a proper
+enter/update/exit. With a few hundred nodes it's not worth the complexity.
+
+Layout is Next.js 14 App Router, Tailwind and shadcn/ui for the shell, Framer Motion for
+page-level animation, D3 for anything with an axis. OG images are generated at request time
+by `@vercel/og`.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

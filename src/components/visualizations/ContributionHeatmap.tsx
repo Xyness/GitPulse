@@ -40,14 +40,14 @@ export function ContributionHeatmap({ data }: ContributionHeatmapProps) {
     const marginTop = 20;
     const totalCellSize = CELL_SIZE + CELL_GAP;
 
-    // Group data by weeks
     const weeks: HeatmapData[][] = [];
     let currentWeek: HeatmapData[] = [];
 
     const firstDay = new Date(data[0].date);
     const startDayOfWeek = firstDay.getDay();
 
-    // Pad the first week
+    // Blank cells so week one lines up with the right day-of-week row,
+    // the way GitHub's own graph does it.
     for (let i = 0; i < startDayOfWeek; i++) {
       currentWeek.push({ date: "", count: -1, level: -1 });
     }
@@ -66,7 +66,6 @@ export function ContributionHeatmap({ data }: ContributionHeatmapProps) {
 
     svg.attr("viewBox", `0 0 ${width} ${height}`);
 
-    // Tooltip
     const tooltip = d3
       .select("body")
       .selectAll<HTMLDivElement, null>(".heatmap-tooltip")
@@ -75,7 +74,6 @@ export function ContributionHeatmap({ data }: ContributionHeatmapProps) {
       .attr("class", "d3-tooltip heatmap-tooltip")
       .style("opacity", 0);
 
-    // Day labels
     DAY_LABELS.forEach((label, i) => {
       if (label) {
         svg
@@ -89,7 +87,6 @@ export function ContributionHeatmap({ data }: ContributionHeatmapProps) {
       }
     });
 
-    // Month labels
     const monthPositions: Record<string, number> = {};
     weeks.forEach((week, weekIdx) => {
       for (const day of week) {
@@ -115,7 +112,6 @@ export function ContributionHeatmap({ data }: ContributionHeatmapProps) {
         .text(month);
     });
 
-    // Cells
     const cellsGroup = svg.append("g");
 
     weeks.forEach((week, weekIdx) => {
@@ -158,7 +154,7 @@ export function ContributionHeatmap({ data }: ContributionHeatmapProps) {
             }
           });
 
-        // Animate fill
+        // Delay by position so the year fills in left to right.
         rect
           .transition()
           .delay(weekIdx * 8 + dayIdx * 2)

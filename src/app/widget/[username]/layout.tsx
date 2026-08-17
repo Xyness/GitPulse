@@ -3,6 +3,6 @@ export default function WidgetLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Minimal layout for widget iframe — no global styles
+  // Deliberately bare: this renders inside someone else's iframe, so no global styles.
   return children;
 }

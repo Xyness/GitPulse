@@ -1,4 +1,4 @@
-// ===== GitHub API Response Types =====
+// Shapes returned by the GitHub GraphQL API.
 
 export interface GitHubUser {
   login: string;
@@ -72,7 +72,7 @@ export interface CommitContributionByRepo {
   };
 }
 
-// ===== GitHub Organization Types =====
+// Org queries return a slightly different shape than user queries.
 
 export interface GitHubOrg {
   login: string;
@@ -87,7 +87,7 @@ export interface GitHubOrg {
   };
 }
 
-// ===== Transformed Data Types (for visualizations) =====
+// What the charts actually consume, after transforms.ts has chewed on the raw API data.
 
 export interface ConstellationNode {
   id: string;

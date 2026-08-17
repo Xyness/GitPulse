@@ -20,7 +20,6 @@ export function ProfileView({ data }: ProfileViewProps) {
   const { user, constellation, heatmap, languageTimeline, languageBreakdown, wrapped } = data;
   const totalStars = user.repositories.nodes.reduce((s, r) => s + r.stargazerCount, 0);
 
-  // Build language color map
   const languageColors: Record<string, string> = {};
   for (const lang of languageBreakdown) {
     languageColors[lang.name] = lang.color;

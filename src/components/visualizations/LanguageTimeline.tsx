@@ -32,27 +32,18 @@ export function LanguageTimeline({ data, languageColors }: LanguageTimelineProps
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // Collect all languages
-    const allLanguages = new Set<string>();
-    for (const entry of data) {
-      for (const lang of Object.keys(entry.languages)) {
-        allLanguages.add(lang);
-      }
-    }
-
-    // Get top 8 languages by total bytes
     const langTotals: Record<string, number> = {};
     for (const entry of data) {
       for (const [lang, bytes] of Object.entries(entry.languages)) {
         langTotals[lang] = (langTotals[lang] ?? 0) + bytes;
       }
     }
+    // Eight bands is about where a streamgraph stops being readable.
     const topLanguages = Object.entries(langTotals)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 8)
       .map(([lang]) => lang);
 
-    // Build stack data
     const stackData = data.map((entry) => {
       const row: Record<string, number | string> = { date: entry.date };
       for (const lang of topLanguages) {
@@ -61,13 +52,14 @@ export function LanguageTimeline({ data, languageColors }: LanguageTimelineProps
       return row;
     });
 
-    // Scales
     const x = d3
       .scalePoint<string>()
       .domain(data.map((d) => d.date))
       .range([0, width])
       .padding(0.5);
 
+    // insideOut + wiggle is the standard streamgraph pairing: biggest series near
+    // the middle, and the baseline floats to keep the overall shape smooth.
     const stack = d3
       .stack<Record<string, number | string>>()
       .keys(topLanguages)
@@ -85,7 +77,6 @@ export function LanguageTimeline({ data, languageColors }: LanguageTimelineProps
       .domain([yMin, yMax])
       .range([height, 0]);
 
-    // Area generator
     const area = d3
       .area<d3.SeriesPoint<Record<string, number | string>>>()
       .x((d) => x(d.data.date as string)!)
@@ -93,7 +84,6 @@ export function LanguageTimeline({ data, languageColors }: LanguageTimelineProps
       .y1((d) => y(d[1]))
       .curve(d3.curveBasis);
 
-    // Tooltip
     const tooltip = d3
       .select("body")
       .selectAll<HTMLDivElement, null>(".lang-timeline-tooltip")
@@ -102,7 +92,6 @@ export function LanguageTimeline({ data, languageColors }: LanguageTimelineProps
       .attr("class", "d3-tooltip lang-timeline-tooltip")
       .style("opacity", 0);
 
-    // Draw areas
     g.selectAll("path")
       .data(series)
       .join("path")
@@ -124,14 +113,13 @@ export function LanguageTimeline({ data, languageColors }: LanguageTimelineProps
       .on("mouseout", () => {
         tooltip.transition().duration(200).style("opacity", 0);
       })
-      // Animated entrance
+      // Staggered fade-in, one language after another.
       .attr("opacity", 0)
       .transition()
       .duration(800)
       .delay((_, i) => i * 100)
       .attr("opacity", 1);
 
-    // X axis
     const tickValues = data
       .map((d) => d.date)
       .filter((_, i) => i % Math.max(1, Math.floor(data.length / 6)) === 0);
@@ -154,7 +142,6 @@ export function LanguageTimeline({ data, languageColors }: LanguageTimelineProps
     return () => cleanup?.();
   }, [render]);
 
-  // Legend
   const topLanguages = Object.entries(
     data.reduce((acc, entry) => {
       for (const [lang, bytes] of Object.entries(entry.languages)) {

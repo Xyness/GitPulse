@@ -34,7 +34,8 @@ export function ConstellationGraph({ nodes, links }: ConstellationGraphProps) {
 
     svg.attr("viewBox", `0 0 ${width} ${height}`);
 
-    // Tooltip
+    // Lives on <body> rather than inside the svg so it isn't clipped by the card,
+    // and the data([null]).join() keeps it a singleton across re-renders.
     const tooltip = d3
       .select("body")
       .selectAll<HTMLDivElement, null>(".constellation-tooltip")
@@ -43,11 +44,12 @@ export function ConstellationGraph({ nodes, links }: ConstellationGraphProps) {
       .attr("class", "d3-tooltip constellation-tooltip")
       .style("opacity", 0);
 
-    // Scale for node radius
+    // sqrt, not linear: it's the area that should track the star count, otherwise
+    // one popular repo swallows the whole canvas.
     const maxStars = Math.max(...nodes.map((n) => n.stars), 1);
     const radiusScale = d3.scaleSqrt().domain([0, maxStars]).range([4, 30]);
 
-    // Create simulation data
+    // Copy the nodes, since the force layout writes x/y/vx/vy onto them.
     const simNodes: SimNode[] = nodes.map((n) => ({ ...n }));
     const simLinks: SimLink[] = links
       .map((l) => ({
@@ -57,7 +59,6 @@ export function ConstellationGraph({ nodes, links }: ConstellationGraphProps) {
       }))
       .filter((l) => l.source && l.target);
 
-    // Defs for glow effect
     const defs = svg.append("defs");
     const filter = defs.append("filter").attr("id", "glow");
     filter
@@ -68,7 +69,8 @@ export function ConstellationGraph({ nodes, links }: ConstellationGraphProps) {
     feMerge.append("feMergeNode").attr("in", "coloredBlur");
     feMerge.append("feMergeNode").attr("in", "SourceGraphic");
 
-    // Background stars (decorative)
+    // Purely decorative backdrop. Sits outside the zoom group so it stays put,
+    // and gets a fresh random layout on every re-render, which nobody notices.
     const starsGroup = svg.append("g").attr("class", "bg-stars");
     for (let i = 0; i < 80; i++) {
       starsGroup
@@ -82,7 +84,6 @@ export function ConstellationGraph({ nodes, links }: ConstellationGraphProps) {
 
     const g = svg.append("g");
 
-    // Zoom behavior
     const zoom = d3
       .zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.3, 4])
@@ -92,7 +93,6 @@ export function ConstellationGraph({ nodes, links }: ConstellationGraphProps) {
 
     svg.call(zoom);
 
-    // Links
     const link = g
       .append("g")
       .selectAll("line")
@@ -102,7 +102,6 @@ export function ConstellationGraph({ nodes, links }: ConstellationGraphProps) {
       .attr("stroke-opacity", 0.15)
       .attr("stroke-width", 1);
 
-    // Nodes
     const node = g
       .append("g")
       .selectAll<SVGCircleElement, SimNode>("circle")
@@ -136,7 +135,7 @@ export function ConstellationGraph({ nodes, links }: ConstellationGraphProps) {
         window.open(d.url, "_blank");
       });
 
-    // Labels for bigger nodes
+    // Only label the nodes big enough to carry text without overlapping.
     const label = g
       .append("g")
       .selectAll("text")
@@ -149,7 +148,7 @@ export function ConstellationGraph({ nodes, links }: ConstellationGraphProps) {
       .attr("dy", (d) => radiusScale(d.stars) + 14)
       .style("pointer-events", "none");
 
-    // Drag behavior
+    // Pinning a node with fx/fy and reheating the sim; released again on drop.
     const drag = d3
       .drag<SVGCircleElement, SimNode>()
       .on("start", (event, d) => {
@@ -169,7 +168,8 @@ export function ConstellationGraph({ nodes, links }: ConstellationGraphProps) {
 
     node.call(drag);
 
-    // Simulation
+    // charge pushes repos apart, collision stops the circles overlapping, and
+    // link distance is what gives shared-language clusters their spacing.
     const simulation = d3
       .forceSimulation(simNodes)
       .force(

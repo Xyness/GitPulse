@@ -41,7 +41,6 @@ export function ActivityTimeline({ repos }: ActivityTimelineProps) {
     return items;
   }, [repos]);
 
-  // Group by year
   const grouped = useMemo(() => {
     const groups: Record<string, TimelineEvent[]> = {};
     for (const event of events) {

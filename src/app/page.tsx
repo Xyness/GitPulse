@@ -59,8 +59,8 @@ export default function HomePage() {
           </h1>
 
           <p className="max-w-lg text-lg text-muted-foreground">
-            Stunning constellation graphs, animated heatmaps, language timelines,
-            and a personalized GitHub Wrapped — all from a single username.
+            Constellation graphs, contribution heatmaps, language timelines and
+            a year-end recap. All from one username.
           </p>
 
           <div className="mt-4 w-full max-w-lg">

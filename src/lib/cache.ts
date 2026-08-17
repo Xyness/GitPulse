@@ -20,7 +20,8 @@ export function setCachedProfile(username: string, data: ProfileData): void {
   const key = username.toLowerCase();
   cache.set(key, { data, timestamp: Date.now() });
 
-  // Evict old entries if cache gets too large
+  // Naive LRU-ish eviction. This lives in the module scope of a serverless
+  // function, so it's per-instance and dies with the instance anyway.
   if (cache.size > 200) {
     const oldest = Array.from(cache.entries()).sort(
       (a, b) => a[1].timestamp - b[1].timestamp
