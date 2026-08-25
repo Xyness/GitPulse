@@ -19,16 +19,16 @@ Type in a GitHub username and get their public activity back as something worth 
 
 ## What's in it
 
-The centrepiece is the **constellation**: every repo is a star, sized by stargazers and
-coloured by language, laid out by a force simulation that pulls repos sharing a language
-towards each other. You can drag stars around and zoom in.
+The main one is the **constellation**: every repo is a star, sized by stargazers and coloured
+by language, laid out by a force simulation that pulls repos sharing a language towards each
+other. Drag the stars around, zoom in.
 
-Alongside that there's a **contribution heatmap** you can click into day by day, a
-**streamgraph** of how someone's languages shifted year over year, and a plain chronological
+Next to that there's a **contribution heatmap** you can click into day by day, a
+**streamgraph** of how somebody's languages shifted year over year, and a plain chronological
 timeline of when repos appeared.
 
 **Wrapped** is the Spotify-Wrapped-style thing: seven animated slides covering the year's
-totals, top language, longest streak, busiest repo. It has its own URL so it's shareable.
+totals, top language, longest streak, busiest repo. Its own URL, so it's shareable.
 
 **Compare** puts two profiles side by side, and `/widget/[username]` is a stripped-down page
 meant to be dropped into an iframe:
@@ -53,9 +53,8 @@ cp .env.example .env.local
 npm run dev
 ```
 
-It works with no configuration, but you'll hit GitHub's unauthenticated rate limit (60
-requests an hour) after a handful of profiles. Drop a token in `.env.local` and that becomes
-5000:
+Works with no configuration, but you'll hit GitHub's unauthenticated rate limit (60 requests
+an hour) after a handful of profiles. Drop a token in `.env.local` and that becomes 5000:
 
 ```env
 GITHUB_TOKEN=ghp_your_token_here
@@ -78,15 +77,15 @@ The token needs no scopes, public data only.
 
 ## Notes on the build
 
-Data comes from GitHub's GraphQL API via `@octokit/graphql`, one query per profile instead of
-a fan-out of REST calls. Contribution calendars are only exposed over GraphQL anyway.
+Data comes from GitHub's GraphQL API through `@octokit/graphql`, one query per profile rather
+than a fan-out of REST calls. Contribution calendars are only exposed over GraphQL anyway.
 
-Responses are cached in a `Map` in module scope for ten minutes. That's per serverless
-instance and evaporates on cold start, which is the right trade for this: it costs nothing,
-and the failure mode is just a slower page.
+Responses are cached in a `Map` in module scope for ten minutes. That's per serverless instance
+and it evaporates on cold start, which is fine here: it costs nothing and the failure mode is a
+slower page.
 
-Every D3 component tears its SVG down and redraws on resize rather than doing a proper
-enter/update/exit. With a few hundred nodes it's not worth the complexity.
+Every D3 component tears its SVG down and redraws on resize instead of doing a proper
+enter/update/exit. At a few hundred nodes it isn't worth the complexity.
 
 Layout is Next.js 14 App Router, Tailwind and shadcn/ui for the shell, Framer Motion for
 page-level animation, D3 for anything with an axis. OG images are generated at request time
