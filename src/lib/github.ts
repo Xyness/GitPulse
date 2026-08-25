@@ -19,7 +19,6 @@ const USER_QUERY = `
       location
       company
       websiteUrl
-      twitterUsername
       followers { totalCount }
       following { totalCount }
       repositories(
@@ -34,7 +33,6 @@ const USER_QUERY = `
           description
           url
           stargazerCount
-          forkCount
           primaryLanguage { name color }
           languages(first: 10, orderBy: { field: SIZE, direction: DESC }) {
             edges {
@@ -50,30 +48,23 @@ const USER_QUERY = `
             }
           }
           createdAt
-          updatedAt
           isArchived
           isFork
         }
       }
       contributionsCollection {
-        totalCommitContributions
-        totalPullRequestContributions
-        totalIssueContributions
-        totalRepositoryContributions
         contributionCalendar {
           totalContributions
           weeks {
             contributionDays {
               date
               contributionCount
-              color
             }
           }
         }
         commitContributionsByRepository(maxRepositories: 100) {
           repository {
             name
-            primaryLanguage { name color }
           }
           contributions {
             totalCount
@@ -103,7 +94,6 @@ const ORG_QUERY = `
           description
           url
           stargazerCount
-          forkCount
           primaryLanguage { name color }
           languages(first: 10, orderBy: { field: SIZE, direction: DESC }) {
             edges {
@@ -119,7 +109,6 @@ const ORG_QUERY = `
             }
           }
           createdAt
-          updatedAt
           isArchived
           isFork
         }
@@ -143,9 +132,12 @@ export async function fetchOrgData(name: string): Promise<GitHubOrg> {
   return response.organization;
 }
 
-export function getRateLimitInfo(): { authenticated: boolean; limit: number } {
-  return {
-    authenticated: !!GITHUB_TOKEN,
-    limit: GITHUB_TOKEN ? 5000 : 60,
-  };
+/**
+ * A missing login comes back as "Could not resolve to a User with the login of
+ * x", which is true but not what you want on screen. Anything else is a real
+ * failure and is worth showing verbatim, rate limits included.
+ */
+export function describeLookupError(error: unknown, notFound: string): string {
+  if (!(error instanceof Error)) return "Something went wrong talking to GitHub.";
+  return error.message.includes("Could not resolve") ? notFound : error.message;
 }

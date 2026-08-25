@@ -1,5 +1,5 @@
 import { fetchUserData } from "@/lib/github";
-import { buildLanguageBreakdown, buildHeatmapData } from "@/lib/transforms";
+import { buildLanguageBreakdown, countStars } from "@/lib/transforms";
 import { WidgetView } from "./widget-view";
 
 interface PageProps {
@@ -10,14 +10,9 @@ export default async function WidgetPage({ params }: PageProps) {
   const { username } = await params;
 
   let widgetData;
-  let error: string | null = null;
 
   try {
     const user = await fetchUserData(username);
-    const totalStars = user.repositories.nodes.reduce(
-      (s, r) => s + r.stargazerCount,
-      0
-    );
     widgetData = {
       username: user.login,
       name: user.name,
@@ -25,25 +20,32 @@ export default async function WidgetPage({ params }: PageProps) {
       totalContributions:
         user.contributionsCollection.contributionCalendar.totalContributions,
       totalRepos: user.repositories.totalCount,
-      totalStars,
-      followers: user.followers.totalCount,
+      totalStars: countStars(user.repositories.nodes),
       topLanguages: buildLanguageBreakdown(user.repositories.nodes).slice(0, 5),
-      heatmap: buildHeatmapData(user),
     };
   } catch {
-    error = "Failed to load widget data.";
+    widgetData = null;
   }
 
   return (
-    <html lang="en" className="dark">
-      <body style={{ margin: 0, background: "#0a0e1a", color: "white", fontFamily: "Inter, system-ui, sans-serif" }}>
-        {error ? (
-          <div style={{ padding: 20, textAlign: "center", color: "#888" }}>
-            {error}
-          </div>
-        ) : widgetData ? (
+    <html lang="en">
+      <body
+        style={{
+          margin: 0,
+          colorScheme: "dark",
+          background: "#0d1117",
+          color: "#e6edf3",
+          fontFamily:
+            '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
+        }}
+      >
+        {widgetData ? (
           <WidgetView data={widgetData} />
-        ) : null}
+        ) : (
+          <p style={{ padding: 20, textAlign: "center", color: "#8b949e" }}>
+            No GitHub user called &quot;{username}&quot;.
+          </p>
+        )}
       </body>
     </html>
   );

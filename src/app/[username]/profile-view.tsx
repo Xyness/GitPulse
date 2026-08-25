@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ProfileHeader } from "@/components/ui/profile-header";
@@ -10,6 +9,7 @@ import { ContributionHeatmap } from "@/components/visualizations/ContributionHea
 import { LanguageTimeline } from "@/components/visualizations/LanguageTimeline";
 import { LanguageBreakdown } from "@/components/visualizations/LanguageBreakdown";
 import { ActivityTimeline } from "@/components/visualizations/ActivityTimeline";
+import { countStars } from "@/lib/transforms";
 import type { ProfileData } from "@/lib/types";
 
 interface ProfileViewProps {
@@ -17,8 +17,8 @@ interface ProfileViewProps {
 }
 
 export function ProfileView({ data }: ProfileViewProps) {
-  const { user, constellation, heatmap, languageTimeline, languageBreakdown, wrapped } = data;
-  const totalStars = user.repositories.nodes.reduce((s, r) => s + r.stargazerCount, 0);
+  const { user, constellation, heatmap, languageTimeline, languageBreakdown } = data;
+  const totalStars = countStars(user.repositories.nodes);
 
   const languageColors: Record<string, string> = {};
   for (const lang of languageBreakdown) {
@@ -27,18 +27,13 @@ export function ProfileView({ data }: ProfileViewProps) {
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 p-6">
-      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <ProfileHeader user={user} totalStars={totalStars} />
         <Link href={`/wrapped/${user.login}`}>
-          <Button variant="outline" className="gap-2">
-            <Sparkles className="h-4 w-4" />
-            View Wrapped
-          </Button>
+          <Button variant="outline">View Wrapped</Button>
         </Link>
       </div>
 
-      {/* Tabs */}
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="grid w-full max-w-lg grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>

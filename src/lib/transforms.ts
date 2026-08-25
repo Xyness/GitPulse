@@ -9,6 +9,10 @@ import type {
   ProfileData,
 } from "./types";
 
+export function countStars(repos: GitHubRepo[]): number {
+  return repos.reduce((sum, repo) => sum + repo.stargazerCount, 0);
+}
+
 export function buildConstellationNodes(repos: GitHubRepo[]): ConstellationNode[] {
   return repos
     .filter((r) => !r.isArchived)
@@ -16,7 +20,6 @@ export function buildConstellationNodes(repos: GitHubRepo[]): ConstellationNode[
       id: repo.name,
       name: repo.name,
       stars: repo.stargazerCount,
-      forks: repo.forkCount,
       commits: repo.defaultBranchRef?.target.history.totalCount ?? 0,
       language: repo.primaryLanguage?.name ?? "Unknown",
       languageColor: repo.primaryLanguage?.color ?? "#8b8b8b",
@@ -148,22 +151,6 @@ function calculateLongestStreak(user: GitHubUser): number {
   return longest;
 }
 
-function buildContributionsByMonth(
-  user: GitHubUser
-): Array<{ month: string; count: number }> {
-  const months: Record<string, number> = {};
-
-  for (const week of user.contributionsCollection.contributionCalendar.weeks) {
-    for (const day of week.contributionDays) {
-      const d = new Date(day.date);
-      const key = d.toLocaleDateString("en-US", { month: "short" });
-      months[key] = (months[key] ?? 0) + day.contributionCount;
-    }
-  }
-
-  return Object.entries(months).map(([month, count]) => ({ month, count }));
-}
-
 export function buildWrappedStats(user: GitHubUser): WrappedStats {
   const repos = user.repositories.nodes;
   const langBreakdown = buildLanguageBreakdown(repos);
@@ -178,15 +165,13 @@ export function buildWrappedStats(user: GitHubUser): WrappedStats {
     { name: "None", commits: 0 }
   );
 
-  const totalStars = repos.reduce((sum, r) => sum + r.stargazerCount, 0);
-
   return {
     username: user.login,
     avatarUrl: user.avatarUrl,
     totalContributions:
       user.contributionsCollection.contributionCalendar.totalContributions,
     totalRepos: user.repositories.totalCount,
-    totalStars,
+    totalStars: countStars(repos),
     topLanguage: topLang,
     mostActiveRepo: mostActive,
     longestStreak: calculateLongestStreak(user),
@@ -197,7 +182,6 @@ export function buildWrappedStats(user: GitHubUser): WrappedStats {
       color: r.primaryLanguage?.color ?? "#8b8b8b",
     })),
     languageBreakdown: langBreakdown.slice(0, 8),
-    contributionsByMonth: buildContributionsByMonth(user),
   };
 }
 

@@ -1,13 +1,11 @@
-"use client";
-
 import Link from "next/link";
 import { Activity } from "lucide-react";
 
 export function Navbar() {
   return (
-    <nav className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
+    <nav className="sticky top-0 z-50 border-b bg-background">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2 font-bold text-lg">
+        <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
           <Activity className="h-5 w-5 text-primary" />
           <span>GitPulse</span>
         </Link>

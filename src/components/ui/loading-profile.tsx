@@ -3,7 +3,6 @@ import { Skeleton } from "./skeleton";
 export function LoadingProfile() {
   return (
     <div className="mx-auto max-w-7xl space-y-8 p-6">
-      {/* Header skeleton */}
       <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
         <Skeleton className="h-32 w-32 rounded-full" />
         <div className="flex-1 space-y-3">
@@ -18,10 +17,8 @@ export function LoadingProfile() {
         </div>
       </div>
 
-      {/* Tabs skeleton */}
-      <Skeleton className="h-10 w-96" />
+      <Skeleton className="h-10 w-full max-w-lg" />
 
-      {/* Content skeleton */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Skeleton className="h-80 rounded-lg" />
         <Skeleton className="h-80 rounded-lg" />

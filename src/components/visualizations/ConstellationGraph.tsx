@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import * as d3 from "d3";
-import { motion } from "framer-motion";
 import { useResizeObserver } from "@/hooks/useResizeObserver";
 import type { ConstellationNode, ConstellationLink } from "@/lib/types";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -18,6 +17,8 @@ interface SimLink extends d3.SimulationLinkDatum<SimNode> {
   strength: number;
 }
 
+const HEIGHT = 500;
+
 export function ConstellationGraph({ nodes, links }: ConstellationGraphProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [containerRef, dimensions] = useResizeObserver();
@@ -30,9 +31,7 @@ export function ConstellationGraph({ nodes, links }: ConstellationGraphProps) {
     svg.selectAll("*").remove();
 
     const { width } = dimensions;
-    const height = 500;
-
-    svg.attr("viewBox", `0 0 ${width} ${height}`);
+    svg.attr("viewBox", `0 0 ${width} ${HEIGHT}`);
 
     // Lives on <body> rather than inside the svg so it isn't clipped by the card,
     // and the data([null]).join() keeps it a singleton across re-renders.
@@ -47,7 +46,7 @@ export function ConstellationGraph({ nodes, links }: ConstellationGraphProps) {
     // sqrt, not linear: it's the area that should track the star count, otherwise
     // one popular repo swallows the whole canvas.
     const maxStars = Math.max(...nodes.map((n) => n.stars), 1);
-    const radiusScale = d3.scaleSqrt().domain([0, maxStars]).range([4, 30]);
+    const radiusScale = d3.scaleSqrt().domain([0, maxStars]).range([4, 28]);
 
     // Copy the nodes, since the force layout writes x/y/vx/vy onto them.
     const simNodes: SimNode[] = nodes.map((n) => ({ ...n }));
@@ -58,29 +57,6 @@ export function ConstellationGraph({ nodes, links }: ConstellationGraphProps) {
         strength: l.strength,
       }))
       .filter((l) => l.source && l.target);
-
-    const defs = svg.append("defs");
-    const filter = defs.append("filter").attr("id", "glow");
-    filter
-      .append("feGaussianBlur")
-      .attr("stdDeviation", "3")
-      .attr("result", "coloredBlur");
-    const feMerge = filter.append("feMerge");
-    feMerge.append("feMergeNode").attr("in", "coloredBlur");
-    feMerge.append("feMergeNode").attr("in", "SourceGraphic");
-
-    // Purely decorative backdrop. Sits outside the zoom group so it stays put,
-    // and gets a fresh random layout on every re-render, which nobody notices.
-    const starsGroup = svg.append("g").attr("class", "bg-stars");
-    for (let i = 0; i < 80; i++) {
-      starsGroup
-        .append("circle")
-        .attr("cx", Math.random() * width)
-        .attr("cy", Math.random() * height)
-        .attr("r", Math.random() * 1.2)
-        .attr("fill", "white")
-        .attr("opacity", Math.random() * 0.4 + 0.1);
-    }
 
     const g = svg.append("g");
 
@@ -98,8 +74,7 @@ export function ConstellationGraph({ nodes, links }: ConstellationGraphProps) {
       .selectAll("line")
       .data(simLinks)
       .join("line")
-      .attr("stroke", "hsl(262, 83%, 58%)")
-      .attr("stroke-opacity", 0.15)
+      .attr("stroke", "hsl(212, 12%, 28%)")
       .attr("stroke-width", 1);
 
     const node = g
@@ -109,14 +84,12 @@ export function ConstellationGraph({ nodes, links }: ConstellationGraphProps) {
       .join("circle")
       .attr("r", (d) => radiusScale(d.stars))
       .attr("fill", (d) => d.languageColor)
+      .attr("fill-opacity", 0.65)
       .attr("stroke", (d) => d.languageColor)
-      .attr("stroke-opacity", 0.5)
-      .attr("stroke-width", 2)
-      .attr("fill-opacity", 0.7)
-      .style("filter", "url(#glow)")
+      .attr("stroke-width", 1.5)
       .style("cursor", "pointer")
       .on("mouseover", (_event, d) => {
-        tooltip.transition().duration(200).style("opacity", 1);
+        tooltip.transition().duration(120).style("opacity", 1);
         tooltip.html(
           `<strong>${d.name}</strong><br/>` +
             `${d.language} &middot; ★ ${d.stars.toLocaleString()} &middot; ${d.commits.toLocaleString()} commits` +
@@ -129,7 +102,7 @@ export function ConstellationGraph({ nodes, links }: ConstellationGraphProps) {
           .style("top", event.pageY - 10 + "px");
       })
       .on("mouseout", () => {
-        tooltip.transition().duration(300).style("opacity", 0);
+        tooltip.transition().duration(200).style("opacity", 0);
       })
       .on("click", (_event, d) => {
         window.open(d.url, "_blank");
@@ -143,7 +116,7 @@ export function ConstellationGraph({ nodes, links }: ConstellationGraphProps) {
       .join("text")
       .text((d) => d.name)
       .attr("font-size", 10)
-      .attr("fill", "hsl(210, 40%, 85%)")
+      .attr("fill", "hsl(212, 9%, 65%)")
       .attr("text-anchor", "middle")
       .attr("dy", (d) => radiusScale(d.stars) + 14)
       .style("pointer-events", "none");
@@ -181,7 +154,7 @@ export function ConstellationGraph({ nodes, links }: ConstellationGraphProps) {
           .strength((d) => d.strength)
       )
       .force("charge", d3.forceManyBody().strength(-120))
-      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("center", d3.forceCenter(width / 2, HEIGHT / 2))
       .force("collision", d3.forceCollide<SimNode>().radius((d) => radiusScale(d.stars) + 4))
       .on("tick", () => {
         link
@@ -208,27 +181,27 @@ export function ConstellationGraph({ nodes, links }: ConstellationGraphProps) {
   }, [render]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.6 }}
-    >
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Constellation</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Each star represents a repository. Size = stars, color = language. Drag to explore.
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div ref={containerRef} className="w-full" role="img" aria-label="Interactive constellation graph of repositories">
-            <svg
-              ref={svgRef}
-              className="h-[500px] w-full rounded-md bg-background"
-            />
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Constellation</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          One circle per repo, sized by stargazers and coloured by language.
+          Drag them about, scroll to zoom, click to open the repo.
+        </p>
+      </CardHeader>
+      <CardContent>
+        <div
+          ref={containerRef}
+          className="w-full"
+          role="img"
+          aria-label="Force graph of repositories, grouped by language"
+        >
+          <svg
+            ref={svgRef}
+            className="h-[500px] w-full rounded-md bg-background"
+          />
+        </div>
+      </CardContent>
+    </Card>
   );
 }

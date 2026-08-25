@@ -1,37 +1,27 @@
-<div align="center">
-
 # GitPulse
 
-**Interactive GitHub activity visualizer**
+Type in a GitHub username and get their public activity back as something worth
+looking at.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![D3.js](https://img.shields.io/badge/D3.js-v7-F9A03C?logo=d3.js&logoColor=white)](https://d3js.org/)
-
-Type in a GitHub username and get their public activity back as something worth looking at.
-
-[**Live demo**](https://git-pulse-virid.vercel.app)
+**[Live demo](https://git-pulse-virid.vercel.app)**
 
 ![Home](docs/home.png)
 
-</div>
-
 ## What's in it
 
-The main one is the **constellation**: every repo is a star, sized by stargazers and coloured
-by language, laid out by a force simulation that pulls repos sharing a language towards each
-other. Drag the stars around, zoom in.
+The main one is the **constellation**: every repo is a circle, sized by stargazers and
+coloured by language, laid out by a force simulation that pulls repos sharing a language
+towards each other. Drag them around, scroll to zoom, click one to open it.
 
 Next to that there's a **contribution heatmap** you can click into day by day, a
-**streamgraph** of how somebody's languages shifted year over year, and a plain chronological
-timeline of when repos appeared.
+**streamgraph** of which languages turned up when, and a reverse-chronological list of
+the last thirty repos.
 
-**Wrapped** is the Spotify-Wrapped-style thing: seven animated slides covering the year's
-totals, top language, longest streak, busiest repo. Its own URL, so it's shareable.
+**Wrapped** is the Spotify-Wrapped-style thing: seven slides covering the year's totals,
+top language, longest streak, busiest repo. It gets its own URL, so it's shareable.
 
-**Compare** puts two profiles side by side, and `/widget/[username]` is a stripped-down page
-meant to be dropped into an iframe:
+**Compare** puts two profiles side by side, and `/widget/[username]` is a stripped-down
+page meant to be dropped into an iframe:
 
 ```html
 <iframe src="https://git-pulse-virid.vercel.app/widget/torvalds" />
@@ -69,7 +59,7 @@ The token needs no scopes, public data only.
 | `/` | Search |
 | `/[username]` | Full profile, every visualization |
 | `/org/[name]` | Organization view |
-| `/wrapped/[username]` | Animated Wrapped slides |
+| `/wrapped/[username]` | Wrapped slides |
 | `/compare` | Two profiles side by side |
 | `/widget/[username]` | Embeddable, no chrome |
 | `/api/profile/[username]` | The JSON behind the pages |
@@ -87,9 +77,14 @@ slower page.
 Every D3 component tears its SVG down and redraws on resize instead of doing a proper
 enter/update/exit. At a few hundred nodes it isn't worth the complexity.
 
-Layout is Next.js 14 App Router, Tailwind and shadcn/ui for the shell, Framer Motion for
-page-level animation, D3 for anything with an axis. OG images are generated at request time
-by `@vercel/og`.
+Colours are GitHub's own dark palette, and the contribution squares are the same five greens
+as the real thing. Making people relearn what a dark square means would be a waste of
+everybody's afternoon.
+
+Next.js 14 App Router and Tailwind for the shell. Button, card and tabs started life as
+shadcn/ui, and Radix is still under the tabs. D3 draws anything with an axis. Framer Motion
+only appears in the Wrapped slides; everywhere else things simply turn up. OG images are
+generated at request time by `@vercel/og`.
 
 ## Contributing
 

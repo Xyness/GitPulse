@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import * as d3 from "d3";
-import { motion } from "framer-motion";
 import { useResizeObserver } from "@/hooks/useResizeObserver";
 import type { LanguageTimelineEntry } from "@/lib/types";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -112,13 +111,7 @@ export function LanguageTimeline({ data, languageColors }: LanguageTimelineProps
       })
       .on("mouseout", () => {
         tooltip.transition().duration(200).style("opacity", 0);
-      })
-      // Staggered fade-in, one language after another.
-      .attr("opacity", 0)
-      .transition()
-      .duration(800)
-      .delay((_, i) => i * 100)
-      .attr("opacity", 1);
+      });
 
     const tickValues = data
       .map((d) => d.date)
@@ -129,7 +122,7 @@ export function LanguageTimeline({ data, languageColors }: LanguageTimelineProps
       .call(d3.axisBottom(x).tickValues(tickValues).tickSize(0))
       .call((g) => g.select(".domain").remove())
       .selectAll("text")
-      .attr("fill", "hsl(215, 20%, 55%)")
+      .attr("fill", "hsl(212, 9%, 58%)")
       .attr("font-size", 10);
 
     return () => {
@@ -154,40 +147,34 @@ export function LanguageTimeline({ data, languageColors }: LanguageTimelineProps
     .slice(0, 8);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.6, delay: 0.3 }}
-    >
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Language Timeline</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            How your tech stack evolved over time
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-3 flex flex-wrap gap-3">
-            {topLanguages.map(([lang]) => (
-              <span key={lang} className="flex items-center gap-1.5 text-xs">
-                <span
-                  className="inline-block h-2.5 w-2.5 rounded-full"
-                  style={{ backgroundColor: languageColors[lang] ?? "#8b8b8b" }}
-                />
-                {lang}
-              </span>
-            ))}
-          </div>
-          <div
-            ref={containerRef}
-            className="w-full"
-            role="img"
-            aria-label="Streamgraph showing language usage evolution over time"
-          >
-            <svg ref={svgRef} className="h-[350px] w-full" />
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Languages over time</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Language bytes, grouped by the month each repo was created
+        </p>
+      </CardHeader>
+      <CardContent>
+        <div className="mb-3 flex flex-wrap gap-3">
+          {topLanguages.map(([lang]) => (
+            <span key={lang} className="flex items-center gap-1.5 text-xs">
+              <span
+                className="inline-block h-2.5 w-2.5 rounded-full"
+                style={{ backgroundColor: languageColors[lang] ?? "#8b8b8b" }}
+              />
+              {lang}
+            </span>
+          ))}
+        </div>
+        <div
+          ref={containerRef}
+          className="w-full"
+          role="img"
+          aria-label="Streamgraph of language bytes by repo creation month"
+        >
+          <svg ref={svgRef} className="h-[350px] w-full" />
+        </div>
+      </CardContent>
+    </Card>
   );
 }

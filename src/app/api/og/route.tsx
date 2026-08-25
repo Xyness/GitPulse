@@ -3,6 +3,11 @@ import { type NextRequest } from "next/server";
 
 export const runtime = "edge";
 
+const BACKGROUND = "#0d1117";
+const BORDER = "#30363d";
+const MUTED = "#8b949e";
+const BLUE = "#58a6ff";
+
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const username = searchParams.get("username") ?? "unknown";
@@ -16,96 +21,46 @@ export async function GET(request: NextRequest) {
           width: "100%",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "#0a0e1a",
-          color: "white",
+          justifyContent: "space-between",
+          padding: 72,
+          backgroundColor: BACKGROUND,
+          color: "#e6edf3",
           fontFamily: "Inter, sans-serif",
         }}
       >
-        {/* Background gradient */}
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background:
-              "radial-gradient(circle at 30% 50%, rgba(124, 58, 237, 0.15), transparent 60%), radial-gradient(circle at 70% 50%, rgba(236, 72, 153, 0.1), transparent 60%)",
-            display: "flex",
-          }}
-        />
-
-        {/* Content */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "16px",
-            zIndex: 1,
-          }}
-        >
+        <div style={{ display: "flex", alignItems: "center", gap: 40 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={`https://github.com/${username}.png?size=120`}
-            alt={`${username}'s avatar`}
-            width={120}
-            height={120}
-            style={{ borderRadius: "50%", border: "3px solid rgba(124, 58, 237, 0.5)" }}
+            src={`https://github.com/${username}.png?size=200`}
+            alt=""
+            width={180}
+            height={180}
+            style={{ borderRadius: "50%", border: `2px solid ${BORDER}` }}
           />
-
-          {/* Title */}
-          <div
-            style={{
-              fontSize: 48,
-              fontWeight: 800,
-              display: "flex",
-              gap: "8px",
-            }}
-          >
-            <span>{username}</span>
-          </div>
-
-          {isWrapped ? (
-            <div
-              style={{
-                fontSize: 28,
-                fontWeight: 600,
-                background: "linear-gradient(90deg, #a855f7, #ec4899)",
-                backgroundClip: "text",
-                color: "transparent",
-                display: "flex",
-              }}
-            >
-              GitHub Wrapped
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div style={{ fontSize: 68, fontWeight: 600, lineHeight: 1 }}>
+              {username}
             </div>
-          ) : (
-            <div
-              style={{
-                fontSize: 20,
-                color: "rgba(255,255,255,0.6)",
-                display: "flex",
-              }}
-            >
-              Interactive GitHub Activity Visualization
+            <div style={{ fontSize: 30, color: MUTED }}>
+              {isWrapped
+                ? "GitHub Wrapped"
+                : "Contributions, languages and every repo"}
             </div>
-          )}
-
-          {/* Branding */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              marginTop: "24px",
-              fontSize: 18,
-              color: "rgba(255,255,255,0.5)",
-            }}
-          >
-            <span style={{ color: "#7c3aed", fontWeight: 700 }}>GitPulse</span>
           </div>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            paddingTop: 28,
+            borderTop: `1px solid ${BORDER}`,
+            fontSize: 24,
+          }}
+        >
+          <span style={{ color: BLUE, fontWeight: 600 }}>GitPulse</span>
+          <span style={{ color: MUTED }}>public data only, no login</span>
         </div>
       </div>
     ),

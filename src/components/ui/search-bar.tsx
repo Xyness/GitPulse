@@ -12,7 +12,7 @@ interface SearchBarProps {
 
 export function SearchBar({
   size = "default",
-  placeholder = "Enter a GitHub username...",
+  placeholder = "GitHub username",
 }: SearchBarProps) {
   const [query, setQuery] = useState("");
   const router = useRouter();
@@ -46,7 +46,7 @@ export function SearchBar({
         />
       </div>
       <Button type="submit" size={isLarge ? "lg" : "default"}>
-        Explore
+        Look up
       </Button>
     </form>
   );

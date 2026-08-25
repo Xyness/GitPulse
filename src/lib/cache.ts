@@ -31,7 +31,3 @@ export function setCachedProfile(username: string, data: ProfileData): void {
     }
   }
 }
-
-export function invalidateCache(username: string): void {
-  cache.delete(username.toLowerCase());
-}

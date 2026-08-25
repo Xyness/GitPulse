@@ -1,7 +1,3 @@
-"use client";
-
-import type { HeatmapData } from "@/lib/types";
-
 interface WidgetData {
   username: string;
   name: string | null;
@@ -9,115 +5,121 @@ interface WidgetData {
   totalContributions: number;
   totalRepos: number;
   totalStars: number;
-  followers: number;
   topLanguages: Array<{ name: string; color: string; percentage: number }>;
-  heatmap: HeatmapData[];
 }
 
+// No Tailwind in here: the widget renders inside someone else's iframe with no
+// global stylesheet, so everything is inline.
+const border = "#30363d";
+const surface = "#161b22";
+const muted = "#8b949e";
+
 export function WidgetView({ data }: { data: WidgetData }) {
+  const stats = [
+    { label: "Contributions", value: data.totalContributions },
+    { label: "Repos", value: data.totalRepos },
+    { label: "Stars", value: data.totalStars },
+  ];
+
   return (
     <div
       style={{
-        padding: "16px",
+        padding: 16,
         maxWidth: 400,
-        borderRadius: 12,
-        border: "1px solid #1e293b",
-        background: "linear-gradient(135deg, #0f172a, #0a0e1a)",
+        borderRadius: 6,
+        border: `1px solid ${border}`,
+        background: "#0d1117",
       }}
     >
-      {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={data.avatarUrl}
-          alt={data.username}
+          alt=""
           width={40}
           height={40}
-          style={{ borderRadius: "50%", border: "2px solid #7c3aed50" }}
+          style={{ borderRadius: "50%", border: `1px solid ${border}` }}
         />
         <div>
           <div style={{ fontWeight: 600, fontSize: 14 }}>
             {data.name ?? data.username}
           </div>
-          <div style={{ fontSize: 12, color: "#94a3b8" }}>
-            @{data.username}
-          </div>
+          <div style={{ fontSize: 12, color: muted }}>@{data.username}</div>
         </div>
       </div>
 
-      {/* Stats */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
+          gridTemplateColumns: "repeat(3, 1fr)",
           gap: 8,
           marginBottom: 12,
         }}
       >
-        {[
-          { label: "Contributions", value: data.totalContributions },
-          { label: "Repos", value: data.totalRepos },
-          { label: "Stars", value: data.totalStars },
-        ].map((stat) => (
+        {stats.map((stat) => (
           <div
             key={stat.label}
             style={{
               textAlign: "center",
               padding: "8px 4px",
-              borderRadius: 8,
-              background: "#1e293b50",
+              borderRadius: 6,
+              background: surface,
+              border: `1px solid ${border}`,
             }}
           >
-            <div style={{ fontSize: 18, fontWeight: 700 }}>
+            <div style={{ fontSize: 18, fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
               {stat.value.toLocaleString()}
             </div>
-            <div style={{ fontSize: 10, color: "#94a3b8" }}>{stat.label}</div>
+            <div style={{ fontSize: 10, color: muted }}>{stat.label}</div>
           </div>
         ))}
       </div>
 
-      {/* Languages */}
-      <div style={{ marginBottom: 8 }}>
-        <div
-          style={{
-            display: "flex",
-            height: 6,
-            borderRadius: 3,
-            overflow: "hidden",
-          }}
-        >
-          {data.topLanguages.map((lang) => (
-            <div
-              key={lang.name}
+      <div style={{ display: "flex", height: 6, borderRadius: 3, overflow: "hidden" }}>
+        {data.topLanguages.map((lang) => (
+          <div
+            key={lang.name}
+            style={{ width: `${lang.percentage}%`, backgroundColor: lang.color }}
+          />
+        ))}
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 10px", marginTop: 6 }}>
+        {data.topLanguages.map((lang) => (
+          <span
+            key={lang.name}
+            style={{ fontSize: 10, color: muted, display: "flex", alignItems: "center", gap: 3 }}
+          >
+            <span
               style={{
-                width: `${lang.percentage}%`,
+                display: "inline-block",
+                width: 7,
+                height: 7,
+                borderRadius: "50%",
                 backgroundColor: lang.color,
               }}
             />
-          ))}
-        </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 10px", marginTop: 6 }}>
-          {data.topLanguages.map((lang) => (
-            <span key={lang.name} style={{ fontSize: 10, color: "#94a3b8", display: "flex", alignItems: "center", gap: 3 }}>
-              <span style={{ display: "inline-block", width: 7, height: 7, borderRadius: "50%", backgroundColor: lang.color }} />
-              {lang.name} {lang.percentage}%
-            </span>
-          ))}
-        </div>
+            {lang.name} {lang.percentage}%
+          </span>
+        ))}
       </div>
 
-      {/* Footer */}
       <div
         style={{
           textAlign: "center",
           fontSize: 10,
-          color: "#64748b",
-          marginTop: 8,
+          marginTop: 12,
           paddingTop: 8,
-          borderTop: "1px solid #1e293b",
+          borderTop: `1px solid ${border}`,
         }}
       >
-        Powered by GitPulse
+        <a
+          href={`/${data.username}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: muted, textDecoration: "none" }}
+        >
+          GitPulse
+        </a>
       </div>
     </div>
   );

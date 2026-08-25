@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Users, GitFork, Link as LinkIcon } from "lucide-react";
+import { Users, BookMarked, Link as LinkIcon } from "lucide-react";
 import { ConstellationGraph } from "@/components/visualizations/ConstellationGraph";
 import { LanguageBreakdown } from "@/components/visualizations/LanguageBreakdown";
 import type { GitHubOrg, ConstellationNode, ConstellationLink } from "@/lib/types";
@@ -19,17 +19,16 @@ export function OrgView({ data }: OrgViewProps) {
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 p-6">
-      {/* Header */}
       <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
         <Image
           src={org.avatarUrl}
-          alt={`${org.login} avatar`}
+          alt=""
           width={96}
           height={96}
-          className="rounded-lg border-2 border-primary/30"
+          className="rounded-md border border-border"
         />
         <div>
-          <h1 className="text-3xl font-bold">{org.name ?? org.login}</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">{org.name ?? org.login}</h1>
           {org.description && (
             <p className="mt-1 text-muted-foreground">{org.description}</p>
           )}
@@ -39,7 +38,7 @@ export function OrgView({ data }: OrgViewProps) {
               {org.membersWithRole.totalCount} members
             </span>
             <span className="flex items-center gap-1">
-              <GitFork className="h-4 w-4" />
+              <BookMarked className="h-4 w-4" />
               {org.repositories.totalCount} repos
             </span>
             {org.websiteUrl && (
@@ -57,7 +56,6 @@ export function OrgView({ data }: OrgViewProps) {
         </div>
       </div>
 
-      {/* Visualizations */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <LanguageBreakdown languages={languageBreakdown} />
         <ConstellationGraph

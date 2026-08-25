@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { fetchUserData } from "@/lib/github";
+import { fetchUserData, describeLookupError } from "@/lib/github";
 import { buildWrappedStats } from "@/lib/transforms";
 import { Navbar } from "@/components/ui/navbar";
+import { LookupError } from "@/components/ui/lookup-error";
 import { WrappedSlides } from "@/components/visualizations/WrappedSlides";
 
 interface PageProps {
@@ -10,12 +11,14 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { username } = await params;
+  const description = `${username}'s last twelve months on GitHub, in seven slides.`;
+
   return {
     title: `${username}'s GitHub Wrapped | GitPulse`,
-    description: `${username}'s year in code: top languages, contributions, streaks, and more.`,
+    description,
     openGraph: {
       title: `${username}'s GitHub Wrapped | GitPulse`,
-      description: `${username}'s year in code.`,
+      description,
       images: [`/api/og?username=${username}&wrapped=true`],
     },
   };
@@ -28,33 +31,21 @@ export default async function WrappedPage({ params }: PageProps) {
   let error: string | null = null;
 
   try {
-    const user = await fetchUserData(username);
-    stats = buildWrappedStats(user);
+    stats = buildWrappedStats(await fetchUserData(username));
   } catch (e) {
-    error =
-      e instanceof Error
-        ? e.message.includes("Could not resolve")
-          ? `User "${username}" not found.`
-          : e.message
-        : "Failed to load data.";
+    error = describeLookupError(e, `No GitHub user called "${username}".`);
   }
 
   return (
     <div className="min-h-screen">
       <Navbar />
-      {error ? (
-        <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 p-6">
-          <h1 className="text-2xl font-bold">Oops!</h1>
-          <p className="text-muted-foreground">{error}</p>
-          <a href="/" className="text-primary underline underline-offset-4">
-            Go back home
-          </a>
-        </div>
-      ) : stats ? (
+      {stats ? (
         <div className="mx-auto max-w-lg px-4 py-12">
           <WrappedSlides stats={stats} />
         </div>
-      ) : null}
+      ) : (
+        <LookupError message={error ?? "That Wrapped would not load."} />
+      )}
     </div>
   );
 }

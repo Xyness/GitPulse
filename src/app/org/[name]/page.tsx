@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import { fetchOrgData } from "@/lib/github";
-import { buildConstellationNodes, buildConstellationLinks, buildLanguageBreakdown } from "@/lib/transforms";
+import { fetchOrgData, describeLookupError } from "@/lib/github";
+import {
+  buildConstellationNodes,
+  buildConstellationLinks,
+  buildLanguageBreakdown,
+} from "@/lib/transforms";
 import { Navbar } from "@/components/ui/navbar";
+import { LookupError } from "@/components/ui/lookup-error";
 import { OrgView } from "./org-view";
 
 interface PageProps {
@@ -13,7 +17,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { name } = await params;
   return {
     title: `${name} | GitPulse`,
-    description: `Interactive visualization of the ${name} organization on GitHub.`,
+    description: `The ${name} organisation on GitHub: repos, languages and how they cluster.`,
   };
 }
 
@@ -35,28 +39,17 @@ export default async function OrgPage({ params }: PageProps) {
       languageBreakdown: buildLanguageBreakdown(repos),
     };
   } catch (e) {
-    error =
-      e instanceof Error
-        ? e.message.includes("Could not resolve")
-          ? `Organization "${name}" not found on GitHub.`
-          : e.message
-        : "Failed to load organization data.";
+    error = describeLookupError(e, `No GitHub organisation called "${name}".`);
   }
 
   return (
     <div className="min-h-screen">
       <Navbar />
-      {error ? (
-        <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 p-6">
-          <h1 className="text-2xl font-bold">Oops!</h1>
-          <p className="text-muted-foreground">{error}</p>
-          <a href="/" className="text-primary underline underline-offset-4">
-            Go back home
-          </a>
-        </div>
-      ) : orgData ? (
+      {orgData ? (
         <OrgView data={orgData} />
-      ) : null}
+      ) : (
+        <LookupError message={error ?? "That organisation would not load."} />
+      )}
     </div>
   );
 }

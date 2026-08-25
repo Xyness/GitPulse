@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Share2, Activity } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { WrappedStats } from "@/lib/types";
 
@@ -12,48 +12,58 @@ interface WrappedSlidesProps {
 }
 
 const slideVariants = {
-  enter: (direction: number) => ({
-    x: direction > 0 ? 300 : -300,
-    opacity: 0,
-    scale: 0.95,
-  }),
-  center: {
-    x: 0,
-    opacity: 1,
-    scale: 1,
-  },
-  exit: (direction: number) => ({
-    x: direction < 0 ? 300 : -300,
-    opacity: 0,
-    scale: 0.95,
-  }),
+  enter: (direction: number) => ({ x: direction > 0 ? 240 : -240, opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (direction: number) => ({ x: direction < 0 ? 240 : -240, opacity: 0 }),
 };
+
+// Every slide reveals its pieces in the same way, so the props live here
+// rather than on a dozen separate motion elements.
+const reveal = (delay: number) => ({
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.35, delay },
+});
+
+const label = "text-xs uppercase tracking-widest text-muted-foreground";
+const bigNumber = "font-mono text-6xl font-semibold tabular-nums";
 
 export function WrappedSlides({ stats }: WrappedSlidesProps) {
   const [[currentSlide, direction], setSlide] = useState([0, 0]);
+  const [copied, setCopied] = useState(false);
 
   const slides = buildSlides(stats);
   const totalSlides = slides.length;
 
-  function paginate(newDirection: number) {
-    const nextSlide = currentSlide + newDirection;
-    if (nextSlide < 0 || nextSlide >= totalSlides) return;
-    setSlide([nextSlide, newDirection]);
+  function paginate(step: number) {
+    const next = currentSlide + step;
+    if (next < 0 || next >= totalSlides) return;
+    setSlide([next, step]);
   }
 
-  function handleShare() {
+  async function handleShare() {
     const url = window.location.href;
+
     if (navigator.share) {
-      navigator.share({ title: `${stats.username}'s GitHub Wrapped`, url });
-    } else {
-      navigator.clipboard.writeText(url);
+      try {
+        await navigator.share({
+          title: `${stats.username}'s GitHub Wrapped`,
+          url,
+        });
+      } catch {
+        // Sheet dismissed. Nothing to say about it.
+      }
+      return;
     }
+
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   }
 
   return (
     <div className="flex flex-col items-center gap-6">
-      {/* Slide container */}
-      <div className="relative h-[520px] w-full max-w-md overflow-hidden rounded-2xl border bg-gradient-to-br from-background via-card to-background">
+      <div className="relative h-[520px] w-full max-w-md overflow-hidden rounded-lg border bg-card">
         <AnimatePresence initial={false} custom={direction} mode="wait">
           <motion.div
             key={currentSlide}
@@ -62,43 +72,38 @@ export function WrappedSlides({ stats }: WrappedSlidesProps) {
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
             className="absolute inset-0 flex flex-col items-center justify-center p-8"
           >
             {slides[currentSlide]}
           </motion.div>
         </AnimatePresence>
 
-        {/* GitPulse branding */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Activity className="h-3 w-3" />
-          GitPulse Wrapped
-        </div>
+        <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs text-muted-foreground">
+          GitPulse
+        </p>
       </div>
 
-      {/* Controls */}
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => paginate(-1)}
           disabled={currentSlide === 0}
+          aria-label="Previous slide"
         >
           <ChevronLeft className="h-5 w-5" />
         </Button>
 
-        {/* Progress dots */}
         <div className="flex gap-1.5">
           {slides.map((_, i) => (
             <button
               key={i}
               onClick={() => setSlide([i, i > currentSlide ? 1 : -1])}
               className={`h-2 rounded-full transition-all ${
-                i === currentSlide
-                  ? "w-6 bg-primary"
-                  : "w-2 bg-muted-foreground/40"
+                i === currentSlide ? "w-6 bg-primary" : "w-2 bg-muted-foreground/40"
               }`}
-              aria-label={`Go to slide ${i + 1}`}
+              aria-label={`Slide ${i + 1}`}
             />
           ))}
         </div>
@@ -108,15 +113,14 @@ export function WrappedSlides({ stats }: WrappedSlidesProps) {
           size="icon"
           onClick={() => paginate(1)}
           disabled={currentSlide === totalSlides - 1}
+          aria-label="Next slide"
         >
           <ChevronRight className="h-5 w-5" />
         </Button>
       </div>
 
-      {/* Share */}
-      <Button variant="outline" className="gap-2" onClick={handleShare}>
-        <Share2 className="h-4 w-4" />
-        Share your Wrapped
+      <Button variant="outline" onClick={handleShare}>
+        {copied ? "Link copied" : "Share"}
       </Button>
     </div>
   );
@@ -124,170 +128,102 @@ export function WrappedSlides({ stats }: WrappedSlidesProps) {
 
 function buildSlides(stats: WrappedStats): React.ReactNode[] {
   return [
-    // Slide 1: Intro
-    <div key="intro" className="text-center space-y-4">
+    <div key="intro" className="space-y-4 text-center">
       <Image
         src={stats.avatarUrl}
-        alt={stats.username}
+        alt=""
         width={80}
         height={80}
-        className="mx-auto rounded-full border-2 border-primary"
+        className="mx-auto rounded-full border border-border"
       />
-      <motion.h2
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="text-2xl font-bold"
-      >
-        {stats.username}&apos;s
+      <motion.h2 {...reveal(0.1)} className="text-xl font-medium">
+        {stats.username}
       </motion.h2>
-      <motion.p
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent"
-      >
+      <motion.p {...reveal(0.2)} className="text-4xl font-semibold tracking-tight">
         GitHub Wrapped
       </motion.p>
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6 }}
-        className="text-muted-foreground"
-      >
-        Your year in code
+      <motion.p {...reveal(0.3)} className="text-muted-foreground">
+        The last twelve months
       </motion.p>
     </div>,
 
-    // Slide 2: Total Contributions
-    <div key="contributions" className="text-center space-y-6">
-      <p className="text-sm uppercase tracking-widest text-muted-foreground">
-        Total Contributions
-      </p>
-      <motion.p
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", delay: 0.2 }}
-        className="text-7xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent"
-      >
+    <div key="contributions" className="space-y-6 text-center">
+      <p className={label}>Contributions</p>
+      <motion.p {...reveal(0.1)} className={bigNumber}>
         {stats.totalContributions.toLocaleString()}
       </motion.p>
       <p className="text-muted-foreground">
-        commits, PRs, issues & reviews
+        commits, pull requests, issues and reviews
       </p>
     </div>,
 
-    // Slide 3: Top Language
-    <div key="language" className="text-center space-y-6">
-      <p className="text-sm uppercase tracking-widest text-muted-foreground">
-        Your #1 Language
-      </p>
+    <div key="language" className="space-y-6 text-center">
+      <p className={label}>Most of the code</p>
       <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", delay: 0.2 }}
-        className="mx-auto h-24 w-24 rounded-full flex items-center justify-center"
-        style={{ backgroundColor: stats.topLanguage.color + "30", border: `3px solid ${stats.topLanguage.color}` }}
+        {...reveal(0.1)}
+        className="mx-auto flex h-24 w-24 items-center justify-center rounded-full"
+        style={{
+          backgroundColor: stats.topLanguage.color + "30",
+          border: `2px solid ${stats.topLanguage.color}`,
+        }}
       >
-        <span className="text-3xl font-bold">{stats.topLanguage.name.slice(0, 2)}</span>
+        <span className="text-2xl font-semibold">
+          {stats.topLanguage.name.slice(0, 2)}
+        </span>
       </motion.div>
-      <motion.p
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="text-3xl font-bold"
-      >
+      <motion.p {...reveal(0.2)} className="text-3xl font-semibold">
         {stats.topLanguage.name}
       </motion.p>
-      <p className="text-muted-foreground">
-        {stats.topLanguage.percentage}% of your code
+      <p className="text-muted-foreground tabular-nums">
+        {stats.topLanguage.percentage}% of the bytes
       </p>
     </div>,
 
-    // Slide 4: Most Active Repo
-    <div key="active-repo" className="text-center space-y-6">
-      <p className="text-sm uppercase tracking-widest text-muted-foreground">
-        Most Active Repository
-      </p>
-      <motion.p
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="text-3xl font-bold text-primary"
-      >
+    <div key="busiest-repo" className="space-y-6 text-center">
+      <p className={label}>Busiest repo</p>
+      <motion.p {...reveal(0.1)} className="text-3xl font-semibold text-primary">
         {stats.mostActiveRepo.name}
       </motion.p>
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4 }}
-        className="text-5xl font-bold"
-      >
+      <motion.p {...reveal(0.2)} className={bigNumber}>
         {stats.mostActiveRepo.commits.toLocaleString()}
       </motion.p>
-      <p className="text-muted-foreground">commits this year</p>
+      <p className="text-muted-foreground">commits went into it</p>
     </div>,
 
-    // Slide 5: Longest Streak
-    <div key="streak" className="text-center space-y-6">
-      <p className="text-sm uppercase tracking-widest text-muted-foreground">
-        Longest Streak
-      </p>
-      <motion.p
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", delay: 0.2 }}
-        className="text-7xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent"
-      >
+    <div key="streak" className="space-y-6 text-center">
+      <p className={label}>Longest streak</p>
+      <motion.p {...reveal(0.1)} className={bigNumber}>
         {stats.longestStreak}
       </motion.p>
-      <p className="text-muted-foreground">consecutive days of contributions</p>
+      <p className="text-muted-foreground">days in a row with something on the board</p>
     </div>,
 
-    // Slide 6: Top Repos
-    <div key="top-repos" className="text-center space-y-4 w-full">
-      <p className="text-sm uppercase tracking-widest text-muted-foreground">
-        Top Repositories
-      </p>
-      <div className="space-y-3">
+    <div key="top-repos" className="w-full space-y-4 text-center">
+      <p className={label}>Most starred</p>
+      <div className="space-y-2">
         {stats.topRepos.map((repo, i) => (
           <motion.div
             key={repo.name}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 * (i + 1) }}
-            className="flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-2.5"
+            {...reveal(0.05 * i)}
+            className="flex items-center justify-between rounded-md border bg-muted/30 px-3 py-2"
           >
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-bold text-muted-foreground">
-                #{i + 1}
-              </span>
-              <span className="font-medium text-sm">{repo.name}</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="truncate text-sm font-medium">{repo.name}</span>
+            <span className="flex items-center gap-2 whitespace-nowrap text-xs text-muted-foreground">
               <span
                 className="h-2 w-2 rounded-full"
                 style={{ backgroundColor: repo.color }}
               />
-              <span>{repo.language}</span>
-              <span>★ {repo.stars}</span>
-            </div>
+              {repo.language}
+              <span className="tabular-nums">★ {repo.stars}</span>
+            </span>
           </motion.div>
         ))}
       </div>
     </div>,
 
-    // Slide 7: Summary
-    <div key="summary" className="text-center space-y-4">
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="text-2xl font-bold"
-      >
-        What a year!
-      </motion.p>
-      <div className="grid grid-cols-2 gap-4 text-center">
+    <div key="summary" className="w-full space-y-4 text-center">
+      <p className={label}>The whole year</p>
+      <div className="grid grid-cols-2 gap-3">
         {[
           { label: "Contributions", value: stats.totalContributions.toLocaleString() },
           { label: "Repos", value: stats.totalRepos.toLocaleString() },
@@ -296,24 +232,16 @@ function buildSlides(stats: WrappedStats): React.ReactNode[] {
         ].map((item, i) => (
           <motion.div
             key={item.label}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 * (i + 1) }}
-            className="rounded-lg border bg-muted/30 p-3"
+            {...reveal(0.05 * i)}
+            className="rounded-md border bg-muted/30 p-3"
           >
-            <p className="text-2xl font-bold">{item.value}</p>
+            <p className="font-mono text-2xl font-semibold tabular-nums">
+              {item.value}
+            </p>
             <p className="text-xs text-muted-foreground">{item.label}</p>
           </motion.div>
         ))}
       </div>
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6 }}
-        className="text-sm text-muted-foreground pt-2"
-      >
-        Share your Wrapped and keep shipping!
-      </motion.p>
     </div>,
   ];
 }

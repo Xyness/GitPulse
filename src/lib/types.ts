@@ -8,7 +8,6 @@ export interface GitHubUser {
   location: string | null;
   company: string | null;
   websiteUrl: string | null;
-  twitterUsername: string | null;
   followers: { totalCount: number };
   following: { totalCount: number };
   repositories: {
@@ -17,10 +16,6 @@ export interface GitHubUser {
   };
   contributionsCollection: {
     contributionCalendar: ContributionCalendar;
-    totalCommitContributions: number;
-    totalPullRequestContributions: number;
-    totalIssueContributions: number;
-    totalRepositoryContributions: number;
     commitContributionsByRepository: CommitContributionByRepo[];
   };
 }
@@ -30,7 +25,6 @@ export interface GitHubRepo {
   description: string | null;
   url: string;
   stargazerCount: number;
-  forkCount: number;
   primaryLanguage: { name: string; color: string } | null;
   languages: {
     edges: Array<{
@@ -44,7 +38,6 @@ export interface GitHubRepo {
     };
   } | null;
   createdAt: string;
-  updatedAt: string;
   isArchived: boolean;
   isFork: boolean;
 }
@@ -59,17 +52,11 @@ export interface ContributionCalendar {
 export interface ContributionDay {
   date: string;
   contributionCount: number;
-  color: string;
 }
 
 export interface CommitContributionByRepo {
-  repository: {
-    name: string;
-    primaryLanguage: { name: string; color: string } | null;
-  };
-  contributions: {
-    totalCount: number;
-  };
+  repository: { name: string };
+  contributions: { totalCount: number };
 }
 
 // Org queries return a slightly different shape than user queries.
@@ -93,7 +80,6 @@ export interface ConstellationNode {
   id: string;
   name: string;
   stars: number;
-  forks: number;
   commits: number;
   language: string;
   languageColor: string;
@@ -118,14 +104,6 @@ export interface LanguageTimelineEntry {
   languages: Record<string, number>;
 }
 
-export interface ActivityEvent {
-  type: "commit" | "pr" | "issue" | "release" | "repo";
-  date: string;
-  title: string;
-  repo: string;
-  url?: string;
-}
-
 export interface WrappedStats {
   username: string;
   avatarUrl: string;
@@ -137,7 +115,6 @@ export interface WrappedStats {
   longestStreak: number;
   topRepos: Array<{ name: string; stars: number; language: string; color: string }>;
   languageBreakdown: Array<{ name: string; color: string; percentage: number }>;
-  contributionsByMonth: Array<{ month: string; count: number }>;
 }
 
 export interface ProfileData {
