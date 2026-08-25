@@ -5,8 +5,6 @@ looking at.
 
 **[Live demo](https://git-pulse-virid.vercel.app)**
 
-![Home](docs/home.png)
-
 ## What's in it
 
 The main one is the **constellation**: every repo is a circle, sized by stargazers and
@@ -28,10 +26,6 @@ page meant to be dropped into an iframe:
 ```
 
 No login anywhere, it only ever reads public data.
-
-![Profile](docs/profile.png)
-
-![Wrapped](docs/wrapped.png)
 
 ## Running it locally
 
